@@ -1,0 +1,15 @@
+# requirements.txt
+# Core ML libraries
+tensorflow>=2.10.0
+scikit-learn>=1.1.0
+pandas>=1.4.0
+numpy>=1.21.0
+joblib>=1.1.0
+
+# Web framework
+Flask>=2.2.0
+Flask-CORS>=3.0.10
+
+# Additional utilities
+matplotlib>=3.5.0
+seaborn>=0.11.0
