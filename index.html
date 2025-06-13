@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Prediksi Risiko Diabetes</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.95);
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .result-card {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .risk-high {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+        
+        .risk-low {
+            background: linear-gradient(45deg, #51cf66, #40c057);
+            color: white;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        .header-icon {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Header -->
+                <div class="text-center mb-5">
+                    <i class="fas fa-heartbeat header-icon"></i>
+                    <h1 class="text-white fw-bold mt-3">Sistem Prediksi Risiko Diabetes</h1>
+                    <p class="text-white-50">Deteksi dini risiko diabetes dengan teknologi AI</p>
+                </div>
+                
+                <!-- Form Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white border-0 py-4">
+                        <h4 class="mb-0 text-center">
+                            <i class="fas fa-clipboard-check text-primary me-2"></i>
+                            Input Data Kesehatan
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="diabetesForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="pregnancies" class="form-label">
+                                        <i class="fas fa-baby me-1"></i>
+                                        Jumlah Kehamilan
+                                    </label>
+                                    <input type="number" class="form-control" id="pregnancies" 
+                                           min="0" max="20" value="0" required>
+                                    <div class="form-text">Jumlah total kehamilan</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="glucose" class="form-label">
+                                        <i class="fas fa-tint me-1"></i>
+                                        Glukosa (mg/dL)
+                                    </label>
+                                    <input type="number" class="form-control" id="glucose" 
+                                           min="0" max="200" step="0.1" required>
+                                    <div class="form-text">Konsentrasi glukosa plasma</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="blood_pressure" class="form-label">
+                                        <i class="fas fa-thermometer-half me-1"></i>
+                                        Tekanan Darah (mmHg)
+                                    </label>
+                                    <input type="number" class="form-control" id="blood_pressure" 
+                                           min="0" max="150" step="0.1" required>
+                                    <div class="form-text">Tekanan darah diastolik</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="skin_thickness" class="form-label">
+                                        <i class="fas fa-ruler me-1"></i>
+                                        Ketebalan Kulit (mm)
+                                    </label>
+                                    <input type="number" class="form-control" id="skin_thickness" 
+                                           min="0" max="100" step="0.1" required>
+                                    <div class="form-text">Ketebalan lipatan kulit trisep</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="insulin" class="form-label">
+                                        <i class="fas fa-syringe me-1"></i>
+                                        Insulin (mu U/ml)
+                                    </label>
+                                    <input type="number" class="form-control" id="insulin" 
+                                           min="0" max="846" step="0.1" required>
+                                    <div class="form-text">Insulin serum 2 jam</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="bmi" class="form-label">
+                                        <i class="fas fa-weight me-1"></i>
+                                        BMI (kg/m²)
+                                    </label>
+                                    <input type="number" class="form-control" id="bmi" 
+                                           min="0" max="70" step="0.1" required>
+                                    <div class="form-text">Body Mass Index</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="diabetes_pedigree" class="form-label">
+                                        <i class="fas fa-dna me-1"></i>
+                                        Riwayat Keluarga
+                                    </label>
+                                    <input type="number" class="form-control" id="diabetes_pedigree" 
+                                           min="0" max="2.5" step="0.001" required>
+                                    <div class="form-text">Fungsi silsilah diabetes</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="age" class="form-label">
+                                        <i class="fas fa-birthday-cake me-1"></i>
+                                        Usia (tahun)
+                                    </label>
+                                    <input type="number" class="form-control" id="age" 
+                                           min="0" max="120" required>
+                                    <div class="form-text">Usia dalam tahun</div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <span class="loading">
+                                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                        Menganalisis...
+                                    </span>
+                                    <span class="normal-text">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Prediksi Risiko Diabetes
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Result Card -->
+                <div class="card result-card" id="resultCard">
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <div id="riskIcon" class="mb-3">
+                                <i class="fas fa-shield-alt" style="font-size: 3rem;"></i>
+                            </div>
+                            <h3 id="riskTitle" class="mb-3">Hasil Prediksi</h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded-3 mb-3" id="riskCard">
+                                        <h4>Tingkat Risiko</h4>
+                                        <h2 id="riskPercentage" class="mb-0">0%</h2>
+                                        <p id="riskCategory" class="mb-0">-</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded-3">
+                                        <h5>Rekomendasi</h5>
+                                        <p id="recommendation" class="mb-0 small">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-primary mt-3" onclick="resetForm()">
+                                <i class="fas fa-redo me-2"></i>
+                                Prediksi Lagi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Card -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-info-circle text-info me-2"></i>
+                            Tentang Sistem Ini
+                        </h5>
+                        <p class="card-text small">
+                            Sistem ini menggunakan teknologi Machine Learning untuk memprediksi risiko diabetes 
+                            berdasarkan data kesehatan Anda. Model ini dilatih menggunakan dataset Pima Indians Diabetes 
+                            dan memberikan estimasi risiko yang dapat membantu dalam deteksi dini.
+                        </p>
+                        <p class="card-text small text-muted">
+                            <strong>Disclaimer:</strong> Hasil prediksi ini hanya untuk referensi dan tidak menggantikan 
+                            konsultasi medis profesional. Selalu konsultasikan dengan dokter untuk diagnosis yang akurat.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API base URL - ganti dengan URL server Anda
+        const API_BASE_URL = 'http://localhost:5000/api';
+        
+        // Form handling
+        document.getElementById('diabetesForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Show loading state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const loadingSpan = submitBtn.querySelector('.loading');
+            const normalSpan = submitBtn.querySelector('.normal-text');
+            
+            loadingSpan.style.display = 'inline';
+            normalSpan.style.display = 'none';
+            submitBtn.disabled = true;
+            
+            // Hide previous results
+            document.getElementById('resultCard').style.display = 'none';
+            
+            try {
+                // Collect form data
+                const formData = {
+                    pregnancies: parseInt(document.getElementById('pregnancies').value),
+                    glucose: parseFloat(document.getElementById('glucose').value),
+                    blood_pressure: parseFloat(document.getElementById('blood_pressure').value),
+                    skin_thickness: parseFloat(document.getElementById('skin_thickness').value),
+                    insulin: parseFloat(document.getElementById('insulin').value),
+                    bmi: parseFloat(document.getElementById('bmi').value),
+                    diabetes_pedigree: parseFloat(document.getElementById('diabetes_pedigree').value),
+                    age: parseInt(document.getElementById('age').value)
+                };
+                
+                // Make API request
+                const response = await fetch(`${API_BASE_URL}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // Display results
+                displayResults(result);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat melakukan prediksi. Pastikan server berjalan di localhost:5000');
+            } finally {
+                // Reset button state
+                loadingSpan.style.display = 'none';
+                normalSpan.style.display = 'inline';
+                submitBtn.disabled = false;
+            }
+        });
+        
+        function displayResults(result) {
+            const resultCard = document.getElementById('resultCard');
+            const riskIcon = document.getElementById('riskIcon');
+            const riskTitle = document.getElementById('riskTitle');
+            const riskCard = document.getElementById('riskCard');
+            const riskPercentage = document.getElementById('riskPercentage');
+            const riskCategory = document.getElementById('riskCategory');
+            const recommendation = document.getElementById('recommendation');
+            
+            // Update risk percentage
+            riskPercentage.textContent = `${result.risk_percentage.toFixed(1)}%`;
+            riskCategory.textContent = `Risiko ${result.risk_category}`;
+            
+            // Update styling based on risk level
+            if (result.risk_category === 'Tinggi') {
+                riskCard.className = 'p-3 rounded-3 mb-3 risk-high';
+                riskIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem;"></i>';
+                riskTitle.textContent = 'Risiko Tinggi Terdeteksi';
+                recommendation.textContent = 'Segera konsultasikan dengan dokter untuk pemeriksaan lebih lanjut. Mulai pola hidup sehat dengan diet rendah gula dan olahraga teratur.';
+            } else {
+                riskCard.className = 'p-3 rounded-3 mb-3 risk-low';
+                riskIcon.innerHTML = '<i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>';
+                riskTitle.textContent = 'Risiko Rendah';
+                recommendation.textContent = 'Pertahankan gaya hidup sehat dengan pola makan seimbang dan olahraga teratur. Lakukan pemeriksaan rutin secara berkala.';
+            }
+            
+            // Show result card
+            resultCard.style.display = 'block';
+            resultCard.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function resetForm() {
+            document.getElementById('diabetesForm').reset();
+            document.getElementById('resultCard').style.display = 'none';
+            document.getElementById('pregnancies').value = '0';
+        }
+        
+        // Sample data untuk testing
+        function fillSampleData() {
+            document.getElementById('pregnancies').value = '2';
+            document.getElementById('glucose').value = '138';
+            document.getElementById('blood_pressure').value = '62';
+            document.getElementById('skin_thickness').value = '35';
+            document.getElementById('insulin').value = '0';
+            document.getElementById('bmi').value = '33.6';
+            document.getElementById('diabetes_pedigree').value = '0.127';
+            document.getElementById('age').value = '47';
+        }
+        
+        // Add sample data button (for testing)
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('diabetesForm');
+            const sampleBtn = document.createElement('button');
+            sampleBtn.type = 'button';
+            sampleBtn.className = 'btn btn-outline-secondary btn-sm me-2';
+            sampleBtn.innerHTML = '<i class="fas fa-vial me-1"></i> Isi Data Contoh';
+            sampleBtn.onclick = fillSampleData;
+            
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.parentNode.insertBefore(sampleBtn, submitBtn);
+        });
+    </script>
+</body>
+</html>
